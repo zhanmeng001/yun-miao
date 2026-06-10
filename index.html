@@ -114,7 +114,17 @@
       display:flex; align-items:center; justify-content:center;
       font-size:1.2rem; flex-shrink:0;
       border: 1px solid rgba(201,168,76,0.3);
+      overflow:hidden;
     }
+    .publish-box .avatar img { width:100%; height:100%; object-fit:cover; }
+    .wechat-login-btn {
+      background: none; border: 1px solid rgba(201,168,76,0.2); border-radius:6px;
+      color: var(--text-light); font-size:0.7rem; cursor:pointer;
+      padding:3px 10px; transition:all 0.15s; font-family:inherit; letter-spacing:1px;
+      white-space:nowrap;
+    }
+    .wechat-login-btn:hover { border-color:rgba(201,168,76,0.4); color:var(--gold); }
+    .publish-header { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
     .publish-box textarea {
       flex:1; border: var(--border-gold); background: rgba(0,0,0,0.3);
       border-radius:10px; padding:10px 14px; font-size:0.9rem;
@@ -289,6 +299,7 @@
       <div class="publish-header">
         <div class="avatar" id="myAvatar">😺</div>
         <textarea id="postInput" placeholder="發布征戰心得、戰報分享… ⚔️"></textarea>
+        <button class="wechat-login-btn" id="wechatLoginBtn" onclick="wechatLogin()" title="使用微信登录自動獲取昵稱和頭像">💬 微信登录</button>
       </div>
       <div class="publish-actions">
         <div id="publishStatus" class="status"></div>
@@ -326,11 +337,24 @@
     let posts = [];
     let isAdmin = localStorage.getItem('yunmiao_admin') === 'true';
     let adminClickCount = 0;
-    // ===== Auto-fill nickname from URL =====
+    // ===== WeChat Login =====
+    function wechatLogin() {
+      window.location.href = 'https://zhanmeng001.github.io/yun-miao/auth';
+    }
+
+    // ===== Handle OAuth callback: auto-fill nickname & avatar =====
     const urlParams = new URLSearchParams(window.location.search);
-    const nameFromUrl = urlParams.get('name');
+    const nameFromUrl = urlParams.get('name') || urlParams.get('nickname');
+    const avatarFromUrl = urlParams.get('avatar');
     if (nameFromUrl) {
       localStorage.setItem('yunmiao_nickname', decodeURIComponent(nameFromUrl));
+    }
+    if (avatarFromUrl) {
+      localStorage.setItem('yunmiao_avatar_url', decodeURIComponent(avatarFromUrl));
+    }
+    // Clean URL params (remove them from address bar)
+    if (nameFromUrl || avatarFromUrl) {
+      window.history.replaceState({}, '', window.location.pathname);
     }
 
     const randomAvatars = ['😺','😸','😻','😼','😽','🙀','😿','😹','🐱','🐈','🐾','🐟'];
@@ -346,6 +370,10 @@
       return name;
     }
     function getMyAvatar() {
+      // Check if user has a custom avatar from WeChat
+      const wechatAvatar = localStorage.getItem('yunmiao_avatar_url');
+      if (wechatAvatar) return wechatAvatar;
+      // Fallback to random emoji
       let av = localStorage.getItem('yunmiao_avatar');
       if (!av) {
         av = randomAvatars[Math.floor(Math.random() * randomAvatars.length)];
@@ -559,7 +587,13 @@
     // ===== App Init (called after access granted) =====
     function initApp() {
       // Set my avatar
-      document.getElementById('myAvatar').textContent = getMyAvatar();
+      const myAv = getMyAvatar();
+      const avatarEl = document.getElementById('myAvatar');
+      if (myAv.startsWith('http')) {
+        avatarEl.innerHTML = '<img src="' + myAv + '" alt="avatar">';
+      } else {
+        avatarEl.textContent = myAv;
+      }
       // Set nickname input placeholder
       document.getElementById('nicknameInput').placeholder = '你的名字（當前: ' + getMyName() + '）';
       // Load posts
