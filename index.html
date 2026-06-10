@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐱 云喵圈子 — 铲屎官的快乐老家</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== Reset & Base ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -14,606 +14,144 @@
       line-height: 1.6;
       overflow-x: hidden;
     }
-
-    :root {
-      --pink: #f7a1b5;
-      --pink-dark: #e8829a;
-      --cream: #fff5ee;
-      --brown: #6b4c3b;
-      --brown-light: #9c7c6a;
-      --card-shadow: 0 4px 20px rgba(247, 161, 181, 0.20);
-      --radius: 16px;
-    }
-
-    a { color: var(--pink-dark); text-decoration: none; }
-
-    /* ===== Floating Cats (background decoration) ===== */
-    .floating-cats {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 0;
-    }
-    .floating-cats span {
-      position: absolute;
-      font-size: 3rem;
-      opacity: 0.08;
-      animation: floatCat 20s ease-in-out infinite;
-    }
-    .floating-cats span:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
-    .floating-cats span:nth-child(2) { top: 40%; right: 8%; animation-delay: -5s; font-size: 4rem; }
-    .floating-cats span:nth-child(3) { top: 70%; left: 12%; animation-delay: -10s; }
-    .floating-cats span:nth-child(4) { bottom: 15%; right: 15%; animation-delay: -15s; font-size: 3.5rem; }
-    .floating-cats span:nth-child(5) { top: 25%; left: 60%; animation-delay: -7s; font-size: 2.5rem; }
-    .floating-cats span:nth-child(6) { bottom: 30%; left: 45%; animation-delay: -12s; }
-
-    @keyframes floatCat {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      25% { transform: translateY(-20px) rotate(3deg); }
-      50% { transform: translateY(-10px) rotate(-2deg); }
-      75% { transform: translateY(-25px) rotate(2deg); }
-    }
-
-    /* ===== Layout Wrapper ===== */
-    .app-wrapper {
-      position: relative;
-      z-index: 1;
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 0 16px 100px;
-    }
-
-    /* ===== Header ===== */
-    header {
-      padding: 28px 0 12px;
-      text-align: center;
-    }
-    header h1 {
-      font-size: 2rem;
-      color: var(--brown);
-      letter-spacing: 2px;
-    }
-    header h1 span { display: inline-block; }
-    header .subtitle {
-      font-size: 0.95rem;
-      color: var(--brown-light);
-      margin-top: 4px;
-    }
-    header .cat-emoji-big { font-size: 3.5rem; display: block; margin-bottom: 4px; }
-
-    /* ===== Stats Bar ===== */
-    .stats-bar {
-      display: flex;
-      justify-content: space-around;
-      background: white;
-      border-radius: var(--radius);
-      padding: 14px 8px;
-      margin: 16px 0 20px;
-      box-shadow: var(--card-shadow);
-    }
-    .stats-bar .stat {
-      text-align: center;
-      flex: 1;
-    }
-    .stats-bar .stat .num {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--pink-dark);
-    }
-    .stats-bar .stat .label {
-      font-size: 0.75rem;
-      color: var(--brown-light);
-      margin-top: 2px;
-    }
-
-    /* ===== Publish Box ===== */
-    .publish-box {
-      background: white;
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--card-shadow);
-      margin-bottom: 20px;
-    }
-    .publish-box .publish-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .publish-box .avatar {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #f7a1b5, #ffd4a8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-    .publish-box textarea {
-      flex: 1;
-      border: none;
-      background: var(--cream);
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 0.9rem;
-      resize: none;
-      height: 44px;
-      font-family: inherit;
-      color: var(--brown);
-      outline: 2px solid transparent;
-      transition: outline 0.2s, height 0.2s;
-    }
-    .publish-box textarea:focus {
-      outline: 2px solid var(--pink);
-      height: 70px;
-    }
-    .publish-box textarea::placeholder { color: #c0a898; }
-    .publish-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-    }
-    .publish-actions .tools button {
-      background: none;
-      border: none;
-      font-size: 1.3rem;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
-    .publish-actions .tools button:hover { background: #f5e6dc; }
-    .publish-btn {
-      background: linear-gradient(135deg, var(--pink), var(--pink-dark));
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 24px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      font-weight: 600;
-    }
-    .publish-btn:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(247, 161, 181, 0.4); }
-    .publish-btn:active { transform: scale(0.96); }
-
-    /* ===== Tabs ===== */
-    .tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
-      background: white;
-      border-radius: var(--radius);
-      padding: 4px;
-      box-shadow: var(--card-shadow);
-    }
-    .tabs button {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 10px 0;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--brown-light);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tabs button.active {
-      background: var(--pink);
-      color: white;
-      box-shadow: 0 2px 8px rgba(247, 161, 181, 0.3);
-    }
-    .tabs button:not(.active):hover { background: #f5e6dc; }
-
-    /* ===== Feed / Cards ===== */
-    .feed { display: flex; flex-direction: column; gap: 16px; }
-
-    .post-card {
-      background: white;
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--card-shadow);
-      transition: transform 0.15s;
-    }
-    .post-card:hover { transform: translateY(-1px); }
-
-    .post-card .post-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .post-card .post-avatar {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-    .post-card .post-author { font-weight: 700; font-size: 0.9rem; }
-    .post-card .post-time {
-      font-size: 0.75rem;
-      color: var(--brown-light);
-      margin-left: auto;
-    }
-    .post-card .post-content {
-      font-size: 0.95rem;
-      margin-bottom: 8px;
-      line-height: 1.7;
-    }
-    .post-card .post-content .cat-emoji { font-size: 1.1rem; }
-    .post-card .post-images {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-    .post-card .post-images .img-placeholder {
-      width: calc(50% - 3px);
-      min-width: 120px;
-      flex: 1;
-      height: 120px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #ffe8d6, #ffd4a8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: #dbaa88;
-    }
-    .post-card .post-images .img-placeholder.single { width: 100%; }
-
-    .post-card .post-actions {
-      display: flex;
-      gap: 20px;
-      padding-top: 8px;
-      border-top: 1px solid #f5e6dc;
-    }
-    .post-card .post-actions button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 0.85rem;
-      color: var(--brown-light);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
-    .post-card .post-actions button:hover { background: #f5e6dc; }
-    .post-card .post-actions button.liked { color: var(--pink-dark); font-weight: 600; }
-    .post-card .post-actions button .icon { font-size: 1.1rem; }
-
-    /* ===== Cat Gallery ===== */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .cat-card {
-      background: white;
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--card-shadow);
-      transition: transform 0.2s;
-      cursor: pointer;
-    }
-    .cat-card:hover { transform: translateY(-3px); }
-    .cat-card .cat-img {
-      height: 140px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 4rem;
-      background: linear-gradient(135deg, #ffe8d6, #fce4d6);
-    }
-    .cat-card .cat-info {
-      padding: 10px 12px;
-    }
-    .cat-card .cat-name { font-weight: 700; font-size: 0.9rem; }
-    .cat-card .cat-desc {
-      font-size: 0.75rem;
-      color: var(--brown-light);
-      margin-top: 2px;
-    }
-
-    /* ===== Topic Tags ===== */
-    .topic-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .topic-tag {
-      background: white;
-      border: 1.5px solid #f0d5c8;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      color: var(--brown);
-      font-weight: 500;
-    }
-    .topic-tag:hover, .topic-tag.active {
-      background: var(--pink);
-      color: white;
-      border-color: var(--pink);
-    }
-
-    /* ===== Toast ===== */
-    .toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--brown);
-      color: white;
-      padding: 10px 24px;
-      border-radius: 30px;
-      font-size: 0.85rem;
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      pointer-events: none;
-      z-index: 100;
-      white-space: nowrap;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ===== Responsive ===== */
-    @media (max-width: 500px) {
-      header h1 { font-size: 1.6rem; }
-      .floating-cats span { font-size: 2rem !important; }
-      .stats-bar .stat .num { font-size: 1.1rem; }
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    /* ===== Scrollbar ===== */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--cream); }
-    ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 3px; }
-
-    /* ===== Empty state ===== */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--brown-light);
-    }
-    .empty-state .big { font-size: 4rem; display: block; margin-bottom: 12px; }
-    .empty-state p { font-size: 0.9rem; }
+    :root { --pink: #f7a1b5; --pink-dark: #e8829a; --cream: #fff5ee; --brown: #6b4c3b; --brown-light: #9c7c6a; --card-shadow: 0 4px 20px rgba(247,161,181,0.20); --radius: 16px; }
+    .floating-cats { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .floating-cats span { position: absolute; font-size: 3rem; opacity: 0.08; animation: floatCat 20s ease-in-out infinite; }
+    .floating-cats span:nth-child(1) { top:10%; left:5%; animation-delay:0s; }
+    .floating-cats span:nth-child(2) { top:40%; right:8%; animation-delay:-5s; font-size:4rem; }
+    .floating-cats span:nth-child(3) { top:70%; left:12%; animation-delay:-10s; }
+    .floating-cats span:nth-child(4) { bottom:15%; right:15%; animation-delay:-15s; font-size:3.5rem; }
+    .floating-cats span:nth-child(5) { top:25%; left:60%; animation-delay:-7s; font-size:2.5rem; }
+    .floating-cats span:nth-child(6) { bottom:30%; left:45%; animation-delay:-12s; }
+    @keyframes floatCat { 0%,100%{transform:translateY(0)rotate(0deg)} 25%{transform:translateY(-20px)rotate(3deg)} 50%{transform:translateY(-10px)rotate(-2deg)} 75%{transform:translateY(-25px)rotate(2deg)} }
+    .app-wrapper { position:relative; z-index:1; max-width:780px; margin:0 auto; padding:0 16px 100px; }
+    header { padding:28px 0 12px; text-align:center; }
+    header h1 { font-size:2rem; color:var(--brown); letter-spacing:2px; }
+    header .subtitle { font-size:0.95rem; color:var(--brown-light); margin-top:4px; }
+    header .cat-emoji-big { font-size:3.5rem; display:block; margin-bottom:4px; }
+    .stats-bar { display:flex; justify-content:space-around; background:white; border-radius:var(--radius); padding:14px 8px; margin:16px 0 20px; box-shadow:var(--card-shadow); }
+    .stats-bar .stat { text-align:center; flex:1; }
+    .stats-bar .stat .num { font-size:1.3rem; font-weight:700; color:var(--pink-dark); }
+    .stats-bar .stat .label { font-size:0.75rem; color:var(--brown-light); margin-top:2px; }
+    .publish-box { background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--card-shadow); margin-bottom:20px; }
+    .publish-box .publish-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .publish-box .avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#f7a1b5,#ffd4a8); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .publish-box textarea { flex:1; border:none; background:var(--cream); border-radius:12px; padding:10px 14px; font-size:0.9rem; resize:none; height:44px; font-family:inherit; color:var(--brown); outline:2px solid transparent; transition:outline 0.2s,height 0.2s; }
+    .publish-box textarea:focus { outline:2px solid var(--pink); height:70px; }
+    .publish-box textarea::placeholder { color:#c0a898; }
+    .publish-actions { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+    .publish-btn { background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white; border:none; border-radius:20px; padding:8px 24px; font-size:0.9rem; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; font-weight:600; }
+    .publish-btn:hover { transform:scale(1.04); box-shadow:0 4px 12px rgba(247,161,181,0.4); }
+    .publish-btn:active { transform:scale(0.96); }
+    .tabs { display:flex; gap:4px; margin-bottom:16px; background:white; border-radius:var(--radius); padding:4px; box-shadow:var(--card-shadow); }
+    .tabs button { flex:1; border:none; background:transparent; padding:10px 0; border-radius:12px; font-size:0.85rem; font-weight:600; color:var(--brown-light); cursor:pointer; transition:all 0.2s; }
+    .tabs button.active { background:var(--pink); color:white; box-shadow:0 2px 8px rgba(247,161,181,0.3); }
+    .tabs button:not(.active):hover { background:#f5e6dc; }
+    .feed { display:flex; flex-direction:column; gap:16px; }
+    .post-card { background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--card-shadow); transition:transform 0.15s; }
+    .post-card:hover { transform:translateY(-1px); }
+    .post-card .post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .post-card .post-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .post-card .post-author { font-weight:700; font-size:0.9rem; }
+    .post-card .post-time { font-size:0.75rem; color:var(--brown-light); margin-left:auto; }
+    .post-card .post-content { font-size:0.95rem; margin-bottom:8px; line-height:1.7; }
+    .post-card .post-content .cat-emoji { font-size:1.1rem; }
+    .post-card .post-actions { display:flex; gap:20px; padding-top:8px; border-top:1px solid #f5e6dc; }
+    .post-card .post-actions button { background:none; border:none; cursor:pointer; font-size:0.85rem; color:var(--brown-light); display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:8px; transition:background 0.15s; }
+    .post-card .post-actions button:hover { background:#f5e6dc; }
+    .post-card .post-actions button.liked { color:var(--pink-dark); font-weight:600; }
+    .post-card .post-actions button .icon { font-size:1.1rem; }
+    .topic-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .topic-tag { background:white; border:1.5px solid #f0d5c8; border-radius:20px; padding:6px 14px; font-size:0.8rem; cursor:pointer; transition:all 0.15s; color:var(--brown); font-weight:500; }
+    .topic-tag:hover, .topic-tag.active { background:var(--pink); color:white; border-color:var(--pink); }
+    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%)translateY(100px); background:var(--brown); color:white; padding:10px 24px; border-radius:30px; font-size:0.85rem; opacity:0; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; z-index:100; white-space:nowrap; }
+    .toast.show { opacity:1; transform:translateX(-50%)translateY(0); }
+    .loading-spinner { text-align:center; padding:30px; color:var(--brown-light); }
+    .loading-spinner .spin { display:inline-block; animation:spin 1s linear infinite; font-size:1.5rem; }
+    @keyframes spin { 100%{transform:rotate(360deg)} }
+    @media (max-width:500px) { header h1 { font-size:1.6rem; } .floating-cats span { font-size:2rem!important; } .stats-bar .stat .num { font-size:1.1rem; } }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--cream); }
+    ::-webkit-scrollbar-thumb { background:var(--pink); border-radius:3px; }
+    .nickname-input { display:flex; gap:8px; margin-bottom:10px; }
+    .nickname-input input { flex:1; border:none; background:var(--cream); border-radius:12px; padding:8px 14px; font-size:0.85rem; font-family:inherit; color:var(--brown); outline:2px solid transparent; }
+    .nickname-input input:focus { outline:2px solid var(--pink); }
+    .nickname-input input::placeholder { color:#c0a898; }
   </style>
 </head>
 <body>
-
-  <!-- Floating Background Cats -->
   <div class="floating-cats">
     <span>🐱</span><span>😸</span><span>😺</span><span>🐈</span><span>😻</span><span>🐾</span>
   </div>
-
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
-
-  <!-- App Wrapper -->
   <div class="app-wrapper">
-
-    <!-- Header -->
     <header>
       <span class="cat-emoji-big">🐈</span>
       <h1>☁️ 云喵圈子</h1>
       <p class="subtitle">🐾 铲屎官的快乐老家 · 云吸猫第一站</p>
     </header>
-
-    <!-- Stats -->
     <div class="stats-bar">
-      <div class="stat">
-        <div class="num" id="memberCount">128</div>
-        <div class="label">🐱 喵友</div>
-      </div>
-      <div class="stat">
-        <div class="num" id="postCount">0</div>
-        <div class="label">📝 帖子</div>
-      </div>
-      <div class="stat">
-        <div class="num" id="miaoCount">999</div>
-        <div class="label">😻 今日喵喵</div>
-      </div>
-      <div class="stat">
-        <div class="num" id="catCount">42</div>
-        <div class="label">🐾 圈内喵星</div>
-      </div>
+      <div class="stat"><div class="num" id="memberCount">🐱</div><div class="label">喵友</div></div>
+      <div class="stat"><div class="num" id="postCount">📝</div><div class="label">帖子</div></div>
+      <div class="stat"><div class="num" id="miaoCount">😻</div><div class="label">今日喵喵</div></div>
+      <div class="stat"><div class="num" id="catCount">🐾</div><div class="label">圈内喵星</div></div>
     </div>
-
-    <!-- Publish -->
     <div class="publish-box">
+      <div class="nickname-input">
+        <input id="nicknameInput" placeholder="你的喵名（可选，随机生成）" maxlength="10">
+      </div>
       <div class="publish-header">
-        <div class="avatar">😺</div>
+        <div class="avatar" id="myAvatar">😺</div>
         <textarea id="postInput" placeholder="分享你家主子的日常… 🐱"></textarea>
       </div>
       <div class="publish-actions">
-        <div class="tools">
-          <button title="发图片" onclick="toast('📸 图片功能开发中～')">🖼️</button>
-          <button title="@喵友" onclick="toast('@ 功能开发中～')">@</button>
-          <button title="选话题" onclick="toast('🏷️ 点击上方话题标签即可')">#</button>
-        </div>
+        <div style="font-size:0.75rem;color:var(--brown-light)" id="publishStatus"></div>
         <button class="publish-btn" onclick="publishPost()">🐱 发 布</button>
       </div>
     </div>
-
-    <!-- Topic Tags -->
     <div class="topic-tags">
       <span class="topic-tag active" data-topic="all" onclick="switchTopic(this)">🌐 全部</span>
       <span class="topic-tag" data-topic="daily" onclick="switchTopic(this)">☀️ 日常晒猫</span>
       <span class="topic-tag" data-topic="funny" onclick="switchTopic(this)">😂 搞笑瞬间</span>
       <span class="topic-tag" data-topic="health" onclick="switchTopic(this)">🏥 养猫科普</span>
       <span class="topic-tag" data-topic="ask" onclick="switchTopic(this)">❓ 求助问答</span>
-      <span class="topic-tag" data-topic="adopt" onclick="switchTopic(this)">🏡 领养信息</span>
     </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="active" onclick="switchTab(this, 'feed')">📰 最新动态</button>
-      <button onclick="switchTab(this, 'gallery')">📸 喵星图鉴</button>
-    </div>
-
-    <!-- Feed -->
     <div class="feed" id="feedContainer">
-
-      <!-- Sample post 1 -->
-      <div class="post-card" data-topic="daily">
-        <div class="post-header">
-          <div class="post-avatar" style="background:linear-gradient(135deg,#a8e6cf,#d4f0e0)">😺</div>
-          <span class="post-author">橘子味の猫</span>
-          <span class="post-time">3 分钟前</span>
-        </div>
-        <div class="post-content">
-          今天给主子开了个新罐头，三秒光盘 🐱🍽️ 这吃相也太夸张了吧哈哈哈
-          <span class="cat-emoji">😹</span>
-        </div>
-        <div class="post-images">
-          <div class="img-placeholder single">🐟 主子の光盘行动</div>
-        </div>
-        <div class="post-actions">
-          <button onclick="toggleLike(this)"><span class="icon">🤍</span> <span>12</span></button>
-          <button><span class="icon">💬</span> <span>4</span></button>
-          <button><span class="icon">🔄</span> <span>2</span></button>
-        </div>
-      </div>
-
-      <!-- Sample post 2 -->
-      <div class="post-card" data-topic="funny">
-        <div class="post-header">
-          <div class="post-avatar" style="background:linear-gradient(135deg,#f7c6d6,#fce4ec)">😼</div>
-          <span class="post-author">胖橘饲养员</span>
-          <span class="post-time">15 分钟前</span>
-        </div>
-        <div class="post-content">
-          企图用纸箱骗猫，结果它选择睡在旁边的塑料袋上 🤦‍♂️ 猫的脑回路果然跟人不一样
-          <span class="cat-emoji">😹</span>
-        </div>
-        <div class="post-images">
-          <div class="img-placeholder">📦 新买的猫窝</div>
-          <div class="img-placeholder">🛍️ 塑料袋真香</div>
-        </div>
-        <div class="post-actions">
-          <button onclick="toggleLike(this)"><span class="icon">🤍</span> <span>28</span></button>
-          <button><span class="icon">💬</span> <span>9</span></button>
-          <button><span class="icon">🔄</span> <span>5</span></button>
-        </div>
-      </div>
-
-      <!-- Sample post 3 -->
-      <div class="post-card" data-topic="health">
-        <div class="post-header">
-          <div class="post-avatar" style="background:linear-gradient(135deg,#b8d4f0,#d4e8fc)">🐱</div>
-          <span class="post-author">兽医小王</span>
-          <span class="post-time">1 小时前</span>
-        </div>
-        <div class="post-content">
-          🏥 <b>【科普】猫咪换粮指南</b><br>
-          不要直接全换！遵循"7日换粮法"：第1-2天旧粮75%+新粮25%，第3-4天各50%，第5-6天新粮75%+旧粮25%，第7天全换。不然主子软便拉稀给你看 😿
-        </div>
-        <div class="post-actions">
-          <button onclick="toggleLike(this)"><span class="icon">🤍</span> <span>45</span></button>
-          <button><span class="icon">💬</span> <span>12</span></button>
-          <button><span class="icon">🔄</span> <span>18</span></button>
-        </div>
-      </div>
-
-      <!-- Sample post 4 -->
-      <div class="post-card" data-topic="daily">
-        <div class="post-header">
-          <div class="post-avatar" style="background:linear-gradient(135deg,#ffe0b2,#ffcc80)">😻</div>
-          <span class="post-author">布偶控小七</span>
-          <span class="post-time">2 小时前</span>
-        </div>
-        <div class="post-content">
-          逆子今天终于肯让我抱了！虽然只坚持了 8 秒 🥹 但老母亲已经很满足了呜呜呜
-          <span class="cat-emoji">💗</span>
-        </div>
-        <div class="post-images">
-          <div class="img-placeholder single">😽 珍惜这8秒</div>
-        </div>
-        <div class="post-actions">
-          <button onclick="toggleLike(this)"><span class="icon">🤍</span> <span>36</span></button>
-          <button><span class="icon">💬</span> <span>7</span></button>
-          <button><span class="icon">🔄</span> <span>3</span></button>
-        </div>
-      </div>
-
-      <!-- Sample post 5 -->
-      <div class="post-card" data-topic="ask">
-        <div class="post-header">
-          <div class="post-avatar" style="background:linear-gradient(135deg,#c8e6c9,#e8f5e9)">😿</div>
-          <span class="post-author">新手铲屎官</span>
-          <span class="post-time">3 小时前</span>
-        </div>
-        <div class="post-content">
-          求助 🙋 两个月的小奶猫接回家第三天，一直躲在沙发下面不出来怎么办？粮和水都放在旁边了，它半夜才出来吃。有没有有经验的姐妹支支招 😭
-        </div>
-        <div class="post-actions">
-          <button onclick="toggleLike(this)"><span class="icon">🤍</span> <span>15</span></button>
-          <button><span class="icon">💬</span> <span>22</span></button>
-          <button><span class="icon">🔄</span> <span>6</span></button>
-        </div>
-      </div>
-
+      <div class="loading-spinner" id="loading"><span class="spin">🐱</span> 加载中…</div>
     </div>
-
-    <!-- Gallery (hidden by default) -->
-    <div class="feed" id="galleryContainer" style="display:none;">
-      <p style="color:var(--brown-light);margin-bottom:12px;font-size:0.9rem;">🐾 圈子里的喵星居民 · 点击投喂小鱼干</p>
-      <div class="gallery-grid" id="galleryGrid">
-
-        <div class="cat-card"><div class="cat-img">🐱</div><div class="cat-info"><div class="cat-name">小橘 / 橘座</div><div class="cat-desc">🐟 吃货 · 5.2kg · 公公</div></div></div>
-        <div class="cat-card"><div class="cat-img">😼</div><div class="cat-info"><div class="cat-name">乌云 / 煤球</div><div class="cat-desc">🌙 社恐 · 4.8kg · 弟弟</div></div></div>
-        <div class="cat-card"><div class="cat-img">😻</div><div class="cat-info"><div class="cat-name">布丁 / 棉花糖</div><div class="cat-desc">🌸 海双布偶 · 3.9kg · 妹妹</div></div></div>
-        <div class="cat-card"><div class="cat-img">😺</div><div class="cat-info"><div class="cat-name">奶盖 / 白手套</div><div class="cat-desc">🧤 黑猫警长 · 5.0kg · 哥哥</div></div></div>
-        <div class="cat-card"><div class="cat-img">🐈</div><div class="cat-info"><div class="cat-name">花花 / 三花</div><div class="cat-desc">🌼 流浪救助 · 3.2kg · 妹妹</div></div></div>
-        <div class="cat-card"><div class="cat-img">😸</div><div class="cat-info"><div class="cat-name">瓜子 / 狸花</div><div class="cat-desc">🌰 拆家狂 · 4.5kg · 弟弟</div></div></div>
-        <div class="cat-card"><div class="cat-img">😽</div><div class="cat-info"><div class="cat-name">团子 / 加菲</div><div class="cat-desc">🍡 永远在睡 · 5.5kg · 公公</div></div></div>
-        <div class="cat-card"><div class="cat-img">🐾</div><div class="cat-info"><div class="cat-name">你的喵</div><div class="cat-desc">✨ 快来上传主子照片！</div></div></div>
-
-      </div>
-    </div>
-
-    <!-- Footer -->
     <div style="text-align:center;padding:32px 0 16px;color:var(--brown-light);font-size:0.8rem;border-top:1px solid #f0d5c8;margin-top:24px;">
-      🐾 云喵圈子 · 所有人都是猫猫教的<br>
-      Made with 💗 for all 铲屎官
+      🐾 云喵圈子 · 所有人都是猫猫教的<br>Made with 💗 for all 铲屎官
     </div>
-
   </div>
-
   <script>
-    // ===== Data =====
-    let postCount = 5;
-    let currentTopic = 'all';
+    // ===== Supabase config =====
+    const SUPABASE_URL = 'https://uvonaehwgylezomtdyxi.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2b25hZWh3Z3lsZXpvbXRkeXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1ODAsImV4cCI6MjA5NjYxNTU4MH0.F7hGSNSOCXS8Iw_3E6zZKxNfnPwWp69no6M1xtqFWlo';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const randomAvatars = ['😺','😸','😻','😼','😽','🙀','😿','😹','🐱','🐈'];
-    const randomNames = [
-      '橘子味の猫','胖橘饲养员','布偶控小七','猫饼投喂机','铲屎大将军',
-      '罐头开罐器','猫毛收集者','深夜吸猫人','猫薄荷成瘾','喵星特派员',
-      '云养猫冠军','逗猫棒终结者','猫罐头鉴定师'
-    ];
-    const sampleTexts = [
-      '今天主子终于肯让我摸了！🧎 虽然摸完就给了我一口，但这就是爱的印记吧 💗',
-      '买了新的猫抓板，结果猫去抓沙发了……🚬 这个家还能不能好了',
-      '我家猫会开门了。是的，真正的物理意义的开门。😨 我要不要给它报个班',
-      '凌晨三点被猫踩醒，它只是想来告诉我——碗里没粮了。🍽️ 好的，你是老大',
-      '谁说猫不能遛？我家猫出门像狗一样兴奋，拽着我满小区跑 🏃‍♂️🐱',
-      '请问这正常吗？猫蹲在路由器上把自己烤了四个小时 📡🔥',
-      '新来的小猫三天学会开冰箱，我觉得我家要出天才了 🧠🐱',
-      '剪指甲像杀猪，擦泪痕像打仗，喂药像极限运动。但可爱是真的 😭💕'
-    ];
+    // ===== State =====
+    let currentTopic = 'all';
+    let posts = [];
+    const randomAvatars = ['😺','😸','😻','😼','😽','🙀','😿','😹','🐱','🐈','🐾','🐟'];
+    const randomNames = ['橘子味の猫','胖橘饲养员','布偶控小七','猫饼投喂机','铲屎大将军','罐头开罐器','猫毛收集者','深夜吸猫人','猫薄荷成瘾','喵星特派员','云养猫冠军','逗猫棒终结者','猫罐头鉴定师','小鱼干守护者','猫窝质检员','撸猫专业户'];
+    const colors = ['#a8e6cf','#f7c6d6','#b8d4f0','#ffe0b2','#c8e6c9','#f0d5c8','#e1bee7','#b2dfdb','#ffccbc','#d1c4e9'];
+
+    function getMyName() {
+      let name = localStorage.getItem('yunmiao_nickname');
+      if (!name) {
+        name = randomNames[Math.floor(Math.random() * randomNames.length)];
+        localStorage.setItem('yunmiao_nickname', name);
+      }
+      return name;
+    }
+    function getMyAvatar() {
+      let av = localStorage.getItem('yunmiao_avatar');
+      if (!av) {
+        av = randomAvatars[Math.floor(Math.random() * randomAvatars.length)];
+        localStorage.setItem('yunmiao_avatar', av);
+      }
+      return av;
+    }
 
     // ===== Toast =====
     function toast(msg) {
@@ -624,56 +162,129 @@
       el._hide = setTimeout(() => el.classList.remove('show'), 2000);
     }
 
-    // ===== Publish =====
-    function publishPost() {
+    // ===== Load Posts from Supabase =====
+    async function loadPosts() {
+      try {
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (error) throw error;
+        posts = data || [];
+        renderPosts();
+      } catch(e) {
+        console.error('Load error:', e);
+        document.getElementById('loading').innerHTML = '😿 加载失败，请刷新重试';
+      }
+    }
+
+    // ===== Render Posts =====
+    function renderPosts() {
+      const container = document.getElementById('feedContainer');
+      const loading = document.getElementById('loading');
+      if (loading) loading.style.display = 'none';
+
+      const filtered = currentTopic === 'all' ? posts : posts.filter(p => p.topic === currentTopic);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="loading-spinner">
+            <div style="font-size:4rem;margin-bottom:12px">🐾</div>
+            <p style="color:var(--brown-light)">还没有帖子，快来发第一条吧！</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(post => {
+        const time = new Date(post.created_at);
+        const timeStr = time.toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+        const avatar = post.avatar || '😺';
+        const author = post.author_name || '匿名喵友';
+        const likes = post.likes || 0;
+        const color = post.color || '#a8e6cf';
+        const content = (post.content || '').replace(/\n/g, '<br>');
+
+        return `
+          <div class="post-card" data-post-id="${post.id}">
+            <div class="post-header">
+              <div class="post-avatar" style="background:linear-gradient(135deg,${color},#fce4ec)">${avatar}</div>
+              <span class="post-author">${author}</span>
+              <span class="post-time">${timeStr}</span>
+            </div>
+            <div class="post-content">${content}</div>
+            <div class="post-actions">
+              <button onclick="toggleLike('${post.id}')">
+                <span class="icon">${post.liked ? '❤️' : '🤍'}</span>
+                <span>${likes}</span>
+              </button>
+              <button><span class="icon">💬</span><span>0</span></button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ===== Publish Post =====
+    async function publishPost() {
       const input = document.getElementById('postInput');
       const text = input.value.trim();
       if (!text) { toast('🐱 写点啥再发呀～'); return; }
 
-      const container = document.getElementById('feedContainer');
-      const name = randomNames[Math.floor(Math.random() * randomNames.length)];
-      const avatar = randomAvatars[Math.floor(Math.random() * randomAvatars.length)];
-      const colors = ['#a8e6cf','#f7c6d6','#b8d4f0','#ffe0b2','#c8e6c9','#f0d5c8','#e1bee7','#b2dfdb'];
-      const color = colors[Math.floor(Math.random() * colors.length)];
+      const btn = document.querySelector('.publish-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ 发布中...';
+      document.getElementById('publishStatus').textContent = '正在保存...';
 
-      const card = document.createElement('div');
-      card.className = 'post-card';
-      card.setAttribute('data-topic', 'daily');
-      card.innerHTML = `
-        <div class="post-header">
-          <div class="post-avatar" style="background:linear-gradient(135deg,${color},#fce4ec)">${avatar}</div>
-          <span class="post-author">${name}</span>
-          <span class="post-time">刚刚</span>
-        </div>
-        <div class="post-content">${text.replace(/\n/g, '<br>')}</div>
-        <div class="post-actions">
-          <button onclick="toggleLike(this)"><span class="icon">🤍</span> <span>0</span></button>
-          <button><span class="icon">💬</span> <span>0</span></button>
-          <button><span class="icon">🔄</span> <span>0</span></button>
-        </div>
-      `;
+      // Set nickname
+      const nickInput = document.getElementById('nicknameInput');
+      if (nickInput.value.trim()) {
+        localStorage.setItem('yunmiao_nickname', nickInput.value.trim());
+      }
 
-      container.prepend(card);
-      input.value = '';
-      postCount++;
-      document.getElementById('postCount').textContent = postCount;
-      toast('🐱 发布成功！喵友们都能看到啦 ✨');
-      switchTopic(document.querySelector('.topic-tag[data-topic="all"]'));
+      const myName = getMyName();
+      const myAv = getMyAvatar();
+      const myColor = colors[Math.floor(Math.random() * colors.length)];
+
+      try {
+        const { error } = await supabase.from('posts').insert({
+          content: text,
+          author_name: myName,
+          avatar: myAv,
+          color: myColor,
+          topic: currentTopic === 'all' ? 'daily' : currentTopic,
+          likes: 0
+        });
+        if (error) throw error;
+
+        input.value = '';
+        toast('🐱 发布成功！喵友们都看到啦 ✨');
+        await loadPosts();
+      } catch(e) {
+        toast('😿 发布失败: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🐱 发 布';
+        document.getElementById('publishStatus').textContent = '';
+      }
     }
 
-    // ===== Like Toggle =====
-    function toggleLike(btn) {
-      const icon = btn.querySelector('.icon');
-      const span = btn.querySelector('span:last-child');
-      let count = parseInt(span.textContent);
-      if (icon.textContent === '🤍') {
-        icon.textContent = '❤️';
-        btn.classList.add('liked');
-        span.textContent = count + 1;
-      } else {
-        icon.textContent = '🤍';
-        btn.classList.remove('liked');
-        span.textContent = count - 1;
+    // ===== Like =====
+    async function toggleLike(postId) {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const newLikes = (post.likes || 0) + (post.liked ? -1 : 1);
+      post.liked = !post.liked;
+      post.likes = newLikes;
+
+      try {
+        await supabase.from('posts').update({ likes: newLikes }).eq('id', postId);
+        renderPosts();
+      } catch(e) {
+        post.likes = (post.likes || 0) + (post.liked ? -1 : 1);
+        post.liked = !post.liked;
+        toast('😿 操作失败');
+        renderPosts();
       }
     }
 
@@ -682,52 +293,42 @@
       document.querySelectorAll('.topic-tag').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       currentTopic = el.dataset.topic;
-
-      const feed = document.getElementById('feedContainer');
-      if (feed.style.display !== 'none') {
-        filterFeed();
-      }
+      renderPosts();
     }
 
-    function filterFeed() {
-      const cards = document.querySelectorAll('#feedContainer .post-card');
-      cards.forEach(c => {
-        if (currentTopic === 'all' || c.dataset.topic === currentTopic) {
-          c.style.display = '';
-        } else {
-          c.style.display = 'none';
-        }
-      });
+    // ===== Realtime subscription =====
+    function setupRealtime() {
+      supabase.channel('public:posts')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+          loadPosts();
+        })
+        .subscribe();
     }
 
-    // ===== Tab Switch =====
-    function switchTab(btn, tab) {
-      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('feedContainer').style.display = tab === 'feed' ? '' : 'none';
-      document.getElementById('galleryContainer').style.display = tab === 'gallery' ? '' : 'none';
-      if (tab === 'feed') filterFeed();
-    }
-
-    // ===== Gallery Cat Click =====
-    document.addEventListener('click', function(e) {
-      const card = e.target.closest('.cat-card');
-      if (card) {
-        const name = card.querySelector('.cat-name')?.textContent || '这只喵';
-        toast('🐟 投喂了 ' + name + ' 一条小鱼干！');
-      }
+    // ===== Init =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set my avatar
+      document.getElementById('myAvatar').textContent = getMyAvatar();
+      // Set nickname input placeholder
+      document.getElementById('nicknameInput').placeholder = '你的喵名（当前: ' + getMyName() + '）';
+      // Load posts
+      loadPosts();
+      setupRealtime();
     });
 
-    // ===== Keyboard shortcut =====
+    // Ctrl+Enter shortcut
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        publishPost();
-      }
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) publishPost();
     });
 
-    // ===== Init count =====
-    document.getElementById('postCount').textContent = postCount;
+    // Update nickname display
+    document.getElementById('nicknameInput').addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.placeholder = '你的喵名';
+      } else {
+        this.placeholder = '你的喵名（当前: ' + getMyName() + '）';
+      }
+    });
   </script>
-
 </body>
 </html>
