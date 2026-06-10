@@ -266,20 +266,7 @@
     }</style>
 </head>
 <body>
-  <!-- ===== Access Gate (shown first) ===== -->
-  <div id="accessGate">
-    <div class="gate-box">
-      <div class="logo-emoji">⚔️</div>
-      <h1>戰盟圈子</h1>
-      <p class="sub">微信群專屬 · 輸入邀請碼進入</p>
-      <input id="gateInviteCode" type="text" placeholder="邀請碼" maxlength="20" autocomplete="off">
-      <input id="gateNickname" type="text" placeholder="你的微信群暱稱（选填）" maxlength="15" autocomplete="off">
-      <button class="gate-btn" onclick="enterGate()">⚔️ 進 入</button>
-      <div class="error" id="gateError"></div>
-    </div>
-  </div>
-
-  <div class="floating-decorations">
+<div class="floating-decorations">
     <span>⚔️</span><span>🏯</span><span>🐎</span><span>🏹</span><span>🗡️</span><span>🛡️</span><span>🚩</span><span>🏴</span>
   </div>
   <div class="toast" id="toast"></div>
@@ -339,46 +326,11 @@
     let posts = [];
     let isAdmin = localStorage.getItem('yunmiao_admin') === 'true';
     let adminClickCount = 0;
-    // ===== Access Control =====
-    const INVITE_CODE = (localStorage.getItem('zhanmeng_invite_code') || 'ZM2026').toLowerCase();
-
-    function enterGate() {
-      const codeInput = document.getElementById('gateInviteCode').value.trim().toLowerCase();
-      const nickInput = document.getElementById('gateNickname').value.trim();
-      const errEl = document.getElementById('gateError');
-
-      if (!codeInput) { errEl.textContent = '請輸入邀請碼'; return; }
-      if (codeInput !== INVITE_CODE) {
-        errEl.textContent = '❌ 邀請碼錯誤，請在微信群中獲取';
-        return;
-      }
-
-      // Save nickname if provided
-      if (nickInput) {
-        localStorage.setItem('yunmiao_nickname', nickInput);
-      }
-      localStorage.setItem('zhanmeng_verified', 'true');
-      document.getElementById('accessGate').classList.add('hidden');
-      toast('⚔️ 歡迎來到戰盟圈子！');
-      initApp();
-    }
-
-    // Check if already verified
-    function checkAccess() {
-      // Auto-fill nickname from URL ?name=xxx
-      const urlParams = new URLSearchParams(window.location.search);
-      const nameFromUrl = urlParams.get('name');
-      if (nameFromUrl) {
-        document.getElementById('gateNickname').value = nameFromUrl;
-        // Also save it right away so they don't need to re-type
-        localStorage.setItem('yunmiao_nickname', decodeURIComponent(nameFromUrl));
-      }
-
-      if (localStorage.getItem('zhanmeng_verified') === 'true') {
-        document.getElementById('accessGate').classList.add('hidden');
-        return true;
-      }
-      return false;
+    // ===== Auto-fill nickname from URL =====
+    const urlParams = new URLSearchParams(window.location.search);
+    const nameFromUrl = urlParams.get('name');
+    if (nameFromUrl) {
+      localStorage.setItem('yunmiao_nickname', decodeURIComponent(nameFromUrl));
     }
 
     const randomAvatars = ['😺','😸','😻','😼','😽','🙀','😿','😹','🐱','🐈','🐾','🐟'];
@@ -580,16 +532,7 @@
         const pwd = prompt('🔑 输入管理员密码：');
         if (pwd === 'YunMiao2026') {
           toggleAdmin();
-          // After admin login, offer to show/change invite code
-          setTimeout(() => {
-            if (confirm('🔑 当前邀請碼: ' + INVITE_CODE.toUpperCase() + '\n要修改邀請碼嗎？')) {
-              const newCode = prompt('輸入新邀請碼（留空不變）:', INVITE_CODE.toUpperCase());
-              if (newCode && newCode.trim()) {
-                localStorage.setItem('zhanmeng_invite_code', newCode.trim().toLowerCase());
-                toast('✅ 邀請碼已更新為: ' + newCode.trim().toUpperCase());
-              }
-            }
-          }, 500);
+
         } else if (pwd !== null) {
           toast('❌ 密码错误');
         }
@@ -628,15 +571,7 @@
       updateStats();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!checkAccess()) {
-        // Show gate - already visible by default
-        const nick = localStorage.getItem('yunmiao_nickname');
-        if (nick) {
-          document.getElementById('gateNickname').placeholder = '微信群暱稱（當前: ' + nick + '）';
-        }
-      }
-    });
+    document.addEventListener('DOMContentLoaded', initApp);
 
     // Ctrl+Enter shortcut
     document.addEventListener('keydown', function(e) {
