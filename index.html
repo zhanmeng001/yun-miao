@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐱 云喵圈子 — 铲屎官的快乐老家</title>
+  <title>⚔️ 戰盟圈子 — 戰友的聚集地</title>
   
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -90,14 +90,14 @@
   <div class="app-wrapper">
     <header>
       <span class="cat-emoji-big">🐈</span>
-      <h1>☁️ 云喵圈子</h1>
-      <p class="subtitle">🐾 铲屎官的快乐老家 · 云吸猫第一站</p>
+      <h1>⚔️ 戰盟圈子</h1>
+      <p class="subtitle">🔥 戰友的聚集地 · 兄弟齊心</p>
     </header>
     <div class="stats-bar">
-      <div class="stat"><div class="num" id="memberCount">🐱</div><div class="label">喵友</div></div>
+      <div class="stat"><div class="num" id="memberCount">⚔️</div><div class="label">戰友</div></div>
       <div class="stat"><div class="num" id="postCount">📝</div><div class="label">帖子</div></div>
       <div class="stat"><div class="num" id="miaoCount">😻</div><div class="label">今日喵喵</div></div>
-      <div class="stat"><div class="num" id="catCount">🐾</div><div class="label">圈内喵星</div></div>
+      <div class="stat"><div class="num" id="catCount">🐾</div><div class="label">圈子成员</div></div>
     </div>
     <div class="publish-box">
       <div class="nickname-input">
@@ -123,7 +123,7 @@
       <div class="loading-spinner" id="loading"><span class="spin">🐱</span> 加载中…</div>
     </div>
     <div style="text-align:center;padding:32px 0 16px;color:var(--brown-light);font-size:0.8rem;border-top:1px solid #f0d5c8;margin-top:24px;">
-      🐾 云喵圈子 · 所有人都是猫猫教的<br>Made with 💗 for all 铲屎官
+      ⚔️ 戰盟圈子 · 兄弟齊心 其利斷金<br>Made with 💗 for all 戰友
     </div>
   </div>
   <script>
@@ -206,7 +206,7 @@
         const time = new Date(post.created_at);
         const timeStr = time.toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
         const avatar = post.avatar || '😺';
-        const author = post.author_name || '匿名喵友';
+        const author = post.author_name || '匿名戰友';
         const likes = post.likes || 0;
         const color = post.color || '#a8e6cf';
         const content = (post.content || '').replace(/\n/g, '<br>');
@@ -265,7 +265,7 @@
         });
 
         input.value = '';
-        toast('🐱 发布成功！喵友们都看到啦 ✨');
+        toast('⚔️ 发布成功！戰友们都看到啦 ✨');
         await loadPosts();
       } catch(e) {
         toast('😿 发布失败: ' + e.message);
