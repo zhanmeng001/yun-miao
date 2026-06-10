@@ -77,6 +77,9 @@
     .nickname-input input { flex:1; border:none; background:var(--cream); border-radius:12px; padding:8px 14px; font-size:0.85rem; font-family:inherit; color:var(--brown); outline:2px solid transparent; }
     .nickname-input input:focus { outline:2px solid var(--pink); }
     .nickname-input input::placeholder { color:#c0a898; }
+    .delete-btn { background:none; border:none; cursor:pointer; font-size:0.8rem; color:#ccc; padding:2px 6px; border-radius:6px; transition:all 0.15s; margin-left:6px; flex-shrink:0; }
+    .delete-btn:hover { color:#e8829a; background:#fef0f0; }
+    .post-header-right { display:flex; align-items:center; margin-left:auto; }
   </style>
 </head>
 <body>
@@ -132,6 +135,8 @@
     // ===== State =====
     let currentTopic = 'all';
     let posts = [];
+    let isAdmin = localStorage.getItem('yunmiao_admin') === 'true';
+    let adminClickCount = 0;
     const randomAvatars = ['😺','😸','😻','😼','😽','🙀','😿','😹','🐱','🐈','🐾','🐟'];
     const randomNames = ['橘子味の猫','胖橘饲养员','布偶控小七','猫饼投喂机','铲屎大将军','罐头开罐器','猫毛收集者','深夜吸猫人','猫薄荷成瘾','喵星特派员','云养猫冠军','逗猫棒终结者','猫罐头鉴定师','小鱼干守护者','猫窝质检员','撸猫专业户'];
     const colors = ['#a8e6cf','#f7c6d6','#b8d4f0','#ffe0b2','#c8e6c9','#f0d5c8','#e1bee7','#b2dfdb','#ffccbc','#d1c4e9'];
@@ -210,7 +215,10 @@
             <div class="post-header">
               <div class="post-avatar" style="background:linear-gradient(135deg,${color},#fce4ec)">${avatar}</div>
               <span class="post-author">${author}</span>
-              <span class="post-time">${timeStr}</span>
+              <div class="post-header-right">
+                <span class="post-time">${timeStr}</span>
+                ${author === getMyName() || isAdmin ? `<button class="delete-btn" onclick="deletePost('${post.id}')" title="${isAdmin ? '管理员删除' : '删除我的帖子'}">✕</button>` : ''}
+              </div>
             </div>
             <div class="post-content">${content}</div>
             <div class="post-actions">
@@ -268,6 +276,19 @@
       }
     }
 
+    // ===== Delete Post =====
+    async function deletePost(postId) {
+      if (!confirm('确定要删除这条帖子吗？😿')) return;
+      try {
+        const { error } = await supabase.from('posts').delete().eq('id', postId);
+        if (error) throw error;
+        toast('🗑️ 已删除');
+        await loadPosts();
+      } catch(e) {
+        toast('😿 删除失败: ' + e.message);
+      }
+    }
+
     // ===== Like =====
     async function toggleLike(postId) {
       const post = posts.find(p => p.id === postId);
@@ -306,6 +327,44 @@
     }
 
     // ===== Init =====
+    function toggleAdmin() {
+      isAdmin = !isAdmin;
+      localStorage.setItem('yunmiao_admin', isAdmin);
+      toast(isAdmin ? '🔑 管理员模式已开启' : '👋 已退出管理员模式');
+      renderPosts();
+    }
+
+    // Hidden admin activation: click title 5 times
+    document.querySelector('header h1').addEventListener('click', () => {
+      adminClickCount++;
+      if (adminClickCount >= 5) {
+        adminClickCount = 0;
+        const pwd = prompt('🔑 输入管理员密码：');
+        if (pwd === 'YunMiao2026') {
+          toggleAdmin();
+        } else if (pwd !== null) {
+          toast('❌ 密码错误');
+        }
+      }
+      setTimeout(() => adminClickCount = 0, 3000);
+    });
+
+    // Show admin badge if in admin mode
+    function renderAdminBadge() {
+      const title = document.querySelector('header h1');
+      if (isAdmin && !document.querySelector('.admin-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'admin-badge';
+        badge.textContent = ' 🔑管理员';
+        badge.style.cssText = 'font-size:0.7rem;color:var(--pink-dark);vertical-align:middle;cursor:pointer;';
+        badge.onclick = toggleAdmin;
+        title.appendChild(badge);
+      } else if (!isAdmin) {
+        const badge = document.querySelector('.admin-badge');
+        if (badge) badge.remove();
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // Set my avatar
       document.getElementById('myAvatar').textContent = getMyAvatar();
@@ -314,6 +373,7 @@
       // Load posts
       loadPosts();
       setupRealtime();
+      if (isAdmin) renderAdminBadge();
     });
 
     // Ctrl+Enter shortcut
