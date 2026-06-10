@@ -6,114 +6,264 @@
   <title>⚔️ 戰盟圈子 — 戰友的聚集地</title>
   
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      background: #fef7f2;
-      color: #4a3728;
-      line-height: 1.6;
+      font-family: 'Noto Serif SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+      background: #1a1008;
+      color: #d4c5a9;
+      line-height: 1.7;
       overflow-x: hidden;
     }
-    :root { --pink: #f7a1b5; --pink-dark: #e8829a; --cream: #fff5ee; --brown: #6b4c3b; --brown-light: #9c7c6a; --card-shadow: 0 4px 20px rgba(247,161,181,0.20); --radius: 16px; }
-    .floating-cats { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-    .floating-cats span { position: absolute; font-size: 3rem; opacity: 0.08; animation: floatCat 20s ease-in-out infinite; }
-    .floating-cats span:nth-child(1) { top:10%; left:5%; animation-delay:0s; }
-    .floating-cats span:nth-child(2) { top:40%; right:8%; animation-delay:-5s; font-size:4rem; }
-    .floating-cats span:nth-child(3) { top:70%; left:12%; animation-delay:-10s; }
-    .floating-cats span:nth-child(4) { bottom:15%; right:15%; animation-delay:-15s; font-size:3.5rem; }
-    .floating-cats span:nth-child(5) { top:25%; left:60%; animation-delay:-7s; font-size:2.5rem; }
-    .floating-cats span:nth-child(6) { bottom:30%; left:45%; animation-delay:-12s; }
-    @keyframes floatCat { 0%,100%{transform:translateY(0)rotate(0deg)} 25%{transform:translateY(-20px)rotate(3deg)} 50%{transform:translateY(-10px)rotate(-2deg)} 75%{transform:translateY(-25px)rotate(2deg)} }
-    .app-wrapper { position:relative; z-index:1; max-width:780px; margin:0 auto; padding:0 16px 100px; }
-    header { padding:28px 0 12px; text-align:center; }
-    header h1 { font-size:2rem; color:var(--brown); letter-spacing:2px; }
-    header .subtitle { font-size:0.95rem; color:var(--brown-light); margin-top:4px; }
-    header .cat-emoji-big { font-size:3.5rem; display:block; margin-bottom:4px; }
-    .stats-bar { display:flex; justify-content:space-around; background:white; border-radius:var(--radius); padding:14px 8px; margin:16px 0 20px; box-shadow:var(--card-shadow); }
-    .stats-bar .stat { text-align:center; flex:1; }
-    .stats-bar .stat .num { font-size:1.3rem; font-weight:700; color:var(--pink-dark); }
-    .stats-bar .stat .label { font-size:0.75rem; color:var(--brown-light); margin-top:2px; }
-    .publish-box { background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--card-shadow); margin-bottom:20px; }
-    .publish-box .publish-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .publish-box .avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#f7a1b5,#ffd4a8); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
-    .publish-box textarea { flex:1; border:none; background:var(--cream); border-radius:12px; padding:10px 14px; font-size:0.9rem; resize:none; height:44px; font-family:inherit; color:var(--brown); outline:2px solid transparent; transition:outline 0.2s,height 0.2s; }
-    .publish-box textarea:focus { outline:2px solid var(--pink); height:70px; }
-    .publish-box textarea::placeholder { color:#c0a898; }
-    .publish-actions { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
-    .publish-btn { background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white; border:none; border-radius:20px; padding:8px 24px; font-size:0.9rem; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; font-weight:600; }
-    .publish-btn:hover { transform:scale(1.04); box-shadow:0 4px 12px rgba(247,161,181,0.4); }
-    .publish-btn:active { transform:scale(0.96); }
-    .tabs { display:flex; gap:4px; margin-bottom:16px; background:white; border-radius:var(--radius); padding:4px; box-shadow:var(--card-shadow); }
-    .tabs button { flex:1; border:none; background:transparent; padding:10px 0; border-radius:12px; font-size:0.85rem; font-weight:600; color:var(--brown-light); cursor:pointer; transition:all 0.2s; }
-    .tabs button.active { background:var(--pink); color:white; box-shadow:0 2px 8px rgba(247,161,181,0.3); }
-    .tabs button:not(.active):hover { background:#f5e6dc; }
-    .feed { display:flex; flex-direction:column; gap:16px; }
-    .post-card { background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--card-shadow); transition:transform 0.15s; }
-    .post-card:hover { transform:translateY(-1px); }
-    .post-card .post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .post-card .post-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
-    .post-card .post-author { font-weight:700; font-size:0.9rem; }
-    .post-card .post-time { font-size:0.75rem; color:var(--brown-light); margin-left:auto; }
-    .post-card .post-content { font-size:0.95rem; margin-bottom:8px; line-height:1.7; }
-    .post-card .post-content .cat-emoji { font-size:1.1rem; }
-    .post-card .post-actions { display:flex; gap:20px; padding-top:8px; border-top:1px solid #f5e6dc; }
-    .post-card .post-actions button { background:none; border:none; cursor:pointer; font-size:0.85rem; color:var(--brown-light); display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:8px; transition:background 0.15s; }
-    .post-card .post-actions button:hover { background:#f5e6dc; }
-    .post-card .post-actions button.liked { color:var(--pink-dark); font-weight:600; }
-    .post-card .post-actions button .icon { font-size:1.1rem; }
-    .topic-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-    .topic-tag { background:white; border:1.5px solid #f0d5c8; border-radius:20px; padding:6px 14px; font-size:0.8rem; cursor:pointer; transition:all 0.15s; color:var(--brown); font-weight:500; }
-    .topic-tag:hover, .topic-tag.active { background:var(--pink); color:white; border-color:var(--pink); }
-    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%)translateY(100px); background:var(--brown); color:white; padding:10px 24px; border-radius:30px; font-size:0.85rem; opacity:0; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; z-index:100; white-space:nowrap; }
-    .toast.show { opacity:1; transform:translateX(-50%)translateY(0); }
-    .loading-spinner { text-align:center; padding:30px; color:var(--brown-light); }
-    .loading-spinner .spin { display:inline-block; animation:spin 1s linear infinite; font-size:1.5rem; }
-    @keyframes spin { 100%{transform:rotate(360deg)} }
-    @media (max-width:500px) { header h1 { font-size:1.6rem; } .floating-cats span { font-size:2rem!important; } .stats-bar .stat .num { font-size:1.1rem; } }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-track { background:var(--cream); }
-    ::-webkit-scrollbar-thumb { background:var(--pink); border-radius:3px; }
-    .nickname-input { display:flex; gap:8px; margin-bottom:10px; }
-    .nickname-input input { flex:1; border:none; background:var(--cream); border-radius:12px; padding:8px 14px; font-size:0.85rem; font-family:inherit; color:var(--brown); outline:2px solid transparent; }
-    .nickname-input input:focus { outline:2px solid var(--pink); }
-    .nickname-input input::placeholder { color:#c0a898; }
-    .delete-btn { background:none; border:none; cursor:pointer; font-size:0.8rem; color:#ccc; padding:2px 6px; border-radius:6px; transition:all 0.15s; margin-left:6px; flex-shrink:0; }
-    .delete-btn:hover { color:#e8829a; background:#fef0f0; }
-    .post-header-right { display:flex; align-items:center; margin-left:auto; }
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8d48b;
+      --red: #8b1a1a;
+      --red-dark: #5c0e0e;
+      --dark: #1a1008;
+      --dark2: #2a1a0e;
+      --parchment: #f5e6d0;
+      --text: #d4c5a9;
+      --text-light: #a08860;
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      --radius: 12px;
+      --border-gold: 1px solid rgba(201,168,76,0.25);
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 40px,
+        rgba(201,168,76,0.02) 40px, rgba(201,168,76,0.02) 41px
+      );
+      pointer-events: none; z-index: 0;
+    }
 
-    /* ===== Access Gate ===== */
-    #accessGate {
-      position:fixed; inset:0; z-index:1000;
+    /* ===== Floating War Decorations ===== */
+    .floating-decorations { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .floating-decorations span {
+      position: absolute; font-size: 2rem; opacity: 0.06;
+      animation: floatItem 25s ease-in-out infinite;
+    }
+    .floating-decorations span:nth-child(1) { top:8%; left:5%; animation-delay:0s; }
+    .floating-decorations span:nth-child(2) { top:35%; right:6%; animation-delay:-6s; font-size:2.8rem; }
+    .floating-decorations span:nth-child(3) { top:65%; left:10%; animation-delay:-12s; }
+    .floating-decorations span:nth-child(4) { bottom:12%; right:12%; animation-delay:-18s; }
+    .floating-decorations span:nth-child(5) { top:20%; left:55%; animation-delay:-8s; font-size:1.8rem; }
+    .floating-decorations span:nth-child(6) { bottom:35%; left:40%; animation-delay:-14s; font-size:2.2rem; }
+    .floating-decorations span:nth-child(7) { top:50%; left:75%; animation-delay:-4s; }
+    .floating-decorations span:nth-child(8) { bottom:5%; left:80%; animation-delay:-20s; font-size:1.6rem; }
+    @keyframes floatItem { 0%,100%{transform:translateY(0)rotate(0deg)} 25%{transform:translateY(-18px)rotate(4deg)} 50%{transform:translateY(-8px)rotate(-3deg)} 75%{transform:translateY(-22px)rotate(2deg)} }
+
+    .app-wrapper { position:relative; z-index:1; max-width:780px; margin:0 auto; padding:0 16px 80px; }
+
+    /* ===== Header ===== */
+    header {
+      padding: 36px 0 20px;
+      text-align: center;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      display: block;
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg,transparent,var(--gold),transparent);
+      margin: 16px auto 0;
+    }
+    header .emblem { font-size: 2.6rem; display:block; margin-bottom:4px; filter: drop-shadow(0 0 10px rgba(201,168,76,0.3)); }
+    header h1 {
+      font-size: 2rem;
+      color: var(--gold);
+      letter-spacing: 6px;
+      text-shadow: 0 0 20px rgba(201,168,76,0.15);
+      font-weight: 700;
+    }
+    header h1 .admin-badge { font-size:0.7rem; color:var(--gold); vertical-align:middle; cursor:pointer; letter-spacing:1px; }
+    header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 8px;
+      letter-spacing: 3px;
+    }
+
+    /* ===== Stats Bar ===== */
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      background: linear-gradient(135deg, rgba(42,26,14,0.9), rgba(26,16,8,0.95));
+      border: var(--border-gold);
+      border-radius: var(--radius);
+      padding: 14px 8px;
+      margin: 16px 0 20px;
+    }
+    .stats-bar .stat { text-align:center; flex:1; }
+    .stats-bar .stat .num { font-size:1.2rem; font-weight:700; color:var(--gold); }
+    .stats-bar .stat .label { font-size:0.72rem; color:var(--text-light); margin-top:2px; letter-spacing:1px; }
+
+    /* ===== Publish Box ===== */
+    .publish-box {
+      background: linear-gradient(135deg, rgba(42,26,14,0.9), rgba(26,16,8,0.95));
+      border: var(--border-gold);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .publish-box .publish-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .publish-box .avatar {
+      width:40px; height:40px; border-radius:50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
       display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+      font-size:1.2rem; flex-shrink:0;
+      border: 1px solid rgba(201,168,76,0.3);
     }
-    #accessGate.hidden { display:none; }
-    .gate-box {
-      background:rgba(255,255,255,0.08); backdrop-filter:blur(16px);
-      border-radius:24px; padding:40px 32px; max-width:380px; width:90%;
-      text-align:center; border:1px solid rgba(255,255,255,0.12);
+    .publish-box textarea {
+      flex:1; border: var(--border-gold); background: rgba(0,0,0,0.3);
+      border-radius:10px; padding:10px 14px; font-size:0.9rem;
+      resize:none; height:44px; font-family:inherit; color:var(--text);
+      outline: none; transition: border-color 0.2s,height 0.2s;
     }
-    .gate-box h1 { color:#fff; font-size:1.6rem; letter-spacing:4px; }
-    .gate-box .sub { color:rgba(255,255,255,0.6); font-size:0.85rem; margin:8px 0 24px; }
-    .gate-box input {
-      width:100%; padding:12px 16px; border-radius:14px; border:1.5px solid rgba(255,255,255,0.15);
-      background:rgba(255,255,255,0.06); color:#fff; font-size:0.95rem; outline:none;
-      transition:border-color 0.2s; font-family:inherit;
-      box-sizing:border-box; margin-bottom:12px;
+    .publish-box textarea:focus { border-color:var(--gold); height:70px; }
+    .publish-box textarea::placeholder { color:rgba(212,197,169,0.3); }
+    .publish-actions { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+    .publish-actions .status { font-size:0.75rem; color:var(--text-light); }
+    .publish-btn {
+      background: linear-gradient(135deg, var(--red), var(--red-dark));
+      color: var(--gold); border: 1px solid rgba(201,168,76,0.3);
+      border-radius:8px; padding:8px 24px; font-size:0.85rem;
+      cursor:pointer; transition:all 0.2s; font-weight:600;
+      font-family:inherit; letter-spacing:2px;
     }
-    .gate-box input:focus { border-color:#e8829a; }
-    .gate-box input::placeholder { color:rgba(255,255,255,0.3); }
-    .gate-box .gate-btn {
-      width:100%; padding:12px; border-radius:14px; border:none;
-      background:linear-gradient(135deg,#e8829a,#f7a1b5);
-      color:#fff; font-size:1rem; cursor:pointer; font-weight:700;
-      transition:transform 0.15s,box-shadow 0.15s;
+    .publish-btn:hover { background: var(--red); border-color:var(--gold); box-shadow:0 0 15px rgba(201,168,76,0.15); }
+    .publish-btn:active { transform:scale(0.97); }
+
+    /* ===== Tabs ===== */
+    .tabs {
+      display:flex; gap:4px; margin-bottom:16px;
+      background: rgba(42,26,14,0.9); border: var(--border-gold);
+      border-radius: var(--radius); padding:4px;
     }
-    .gate-box .gate-btn:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(232,130,154,0.4); }
-    .gate-box .gate-btn:active { transform:scale(0.98); }
-    .gate-box .error { color:#ff6b6b; font-size:0.8rem; margin-top:8px; min-height:20px; }
-    .gate-box .logo-emoji { font-size:3rem; margin-bottom:8px; }
-  </style>
+    .tabs button {
+      flex:1; border:none; background:transparent; padding:10px 0;
+      border-radius:8px; font-size:0.82rem; font-weight:600;
+      color: var(--text-light); cursor:pointer; transition:all 0.2s;
+      font-family:inherit; letter-spacing:1px;
+    }
+    .tabs button.active {
+      background: linear-gradient(135deg, var(--red), var(--red-dark));
+      color: var(--gold); box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    }
+    .tabs button:not(.active):hover { background: rgba(201,168,76,0.08); }
+
+    /* ===== Feed ===== */
+    .feed { display:flex; flex-direction:column; gap:14px; }
+
+    .post-card {
+      background: linear-gradient(135deg, rgba(42,26,14,0.85), rgba(26,16,8,0.9));
+      border: var(--border-gold);
+      border-radius: var(--radius);
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    .post-card:hover {
+      border-color: rgba(201,168,76,0.4);
+      box-shadow: 0 0 20px rgba(201,168,76,0.05);
+    }
+    .post-card .post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .post-card .post-avatar {
+      width:38px; height:38px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; flex-shrink:0;
+      border: 1px solid rgba(201,168,76,0.2);
+    }
+    .post-card .post-author { font-weight:700; font-size:0.88rem; color:var(--gold-light); }
+    .post-card .post-time { font-size:0.7rem; color:var(--text-light); }
+    .post-card .post-header-right { display:flex; align-items:center; gap:6px; margin-left:auto; }
+    .post-card .post-content {
+      font-size:0.92rem; margin-bottom:8px; line-height:1.8;
+      color: var(--text); letter-spacing:0.5px;
+    }
+    .post-card .post-actions {
+      display:flex; gap:20px; padding-top:8px;
+      border-top: 1px solid rgba(201,168,76,0.12);
+    }
+    .post-card .post-actions button {
+      background:none; border:none; cursor:pointer;
+      font-size:0.8rem; color:var(--text-light);
+      display:flex; align-items:center; gap:4px;
+      padding:4px 8px; border-radius:6px; transition:all 0.15s;
+      font-family:inherit;
+    }
+    .post-card .post-actions button:hover { background:rgba(201,168,76,0.08); color:var(--gold); }
+    .post-card .post-actions button.liked { color:var(--red); font-weight:600; }
+    .post-card .post-actions button .icon { font-size:1rem; }
+
+    /* ===== Topic Tags ===== */
+    .topic-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .topic-tag {
+      background: rgba(42,26,14,0.8); border: 1px solid rgba(201,168,76,0.15);
+      border-radius:6px; padding:6px 14px; font-size:0.78rem;
+      cursor:pointer; transition:all 0.15s; color:var(--text-light);
+      font-weight:500; letter-spacing:1px;
+    }
+    .topic-tag:hover, .topic-tag.active {
+      background: rgba(139,26,26,0.6); color:var(--gold);
+      border-color:rgba(201,168,76,0.3);
+    }
+
+    /* ===== Delete button ===== */
+    .delete-btn {
+      background:none; border:none; cursor:pointer;
+      font-size:0.75rem; color:rgba(212,197,169,0.2);
+      padding:2px 6px; border-radius:4px;
+      transition:all 0.15s; flex-shrink:0;
+    }
+    .delete-btn:hover { color:var(--red); background:rgba(139,26,26,0.15); }
+
+    /* ===== Toast ===== */
+    .toast {
+      position:fixed; bottom:80px; left:50%;
+      transform:translateX(-50%)translateY(100px);
+      background: rgba(26,16,8,0.95); color:var(--gold);
+      padding:10px 24px; border-radius:8px; font-size:0.82rem;
+      opacity:0; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events:none; z-index:100; white-space:nowrap;
+      border: 1px solid rgba(201,168,76,0.2);
+    }
+    .toast.show { opacity:1; transform:translateX(-50%)translateY(0); }
+
+    /* ===== Loading ===== */
+    .loading-spinner { text-align:center; padding:40px 20px; color:var(--text-light); }
+    .loading-spinner .spin { display:inline-block; animation:spin 1s linear infinite; font-size:1.3rem; }
+    @keyframes spin { 100%{transform:rotate(360deg)} }
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--dark); }
+    ::-webkit-scrollbar-thumb { background:var(--gold); border-radius:3px; opacity:0.5; }
+
+    /* ===== Nickname Input ===== */
+    .nickname-input { display:flex; gap:8px; margin-bottom:10px; }
+    .nickname-input input {
+      flex:1; border: var(--border-gold); background:rgba(0,0,0,0.3);
+      border-radius:8px; padding:8px 14px; font-size:0.82rem;
+      font-family:inherit; color:var(--text); outline:none;
+    }
+    .nickname-input input:focus { border-color:var(--gold); }
+    .nickname-input input::placeholder { color:rgba(212,197,169,0.25); }
+
+    /* ===== Responsive ===== */
+    @media (max-width:500px) {
+      header h1 { font-size:1.5rem; }
+      .floating-decorations span { font-size:1.5rem!important; }
+      .stats-bar .stat .num { font-size:1rem; }
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align:center; padding:32px 0 16px;
+      color:var(--text-light); font-size:0.75rem;
+      border-top:1px solid rgba(201,168,76,0.1); margin-top:24px;
+      letter-spacing:1px;
+    }</style>
 </head>
 <body>
   <!-- ===== Access Gate (shown first) ===== -->
@@ -129,47 +279,47 @@
     </div>
   </div>
 
-  <div class="floating-cats">
-    <span>🐱</span><span>😸</span><span>😺</span><span>🐈</span><span>😻</span><span>🐾</span>
+  <div class="floating-decorations">
+    <span>⚔️</span><span>🏯</span><span>🐎</span><span>🏹</span><span>🗡️</span><span>🛡️</span><span>🚩</span><span>🏴</span>
   </div>
   <div class="toast" id="toast"></div>
   <div class="app-wrapper">
     <header>
-      <span class="cat-emoji-big">🐈</span>
+      <span class="emblem">⚔️</span>
       <h1>⚔️ 戰盟圈子</h1>
-      <p class="subtitle">🔥 戰友的聚集地 · 兄弟齊心</p>
+      <p class="subtitle">🔥 戰盟風雲 · 兄弟齊心 · 其利斷金</p>
     </header>
     <div class="stats-bar">
       <div class="stat"><div class="num" id="memberCount">⚔️</div><div class="label">戰友</div></div>
       <div class="stat"><div class="num" id="postCount">📝</div><div class="label">帖子</div></div>
-      <div class="stat"><div class="num" id="miaoCount">😻</div><div class="label">今日喵喵</div></div>
+      <div class="stat"><div class="num">11</div><div class="label">🏯 赛季</div></div>
       <div class="stat"><div class="num" id="catCount">🐾</div><div class="label">圈子成员</div></div>
     </div>
     <div class="publish-box">
       <div class="nickname-input">
-        <input id="nicknameInput" placeholder="你的喵名（可选，随机生成）" maxlength="10">
+        <input id="nicknameInput" placeholder="你的稱號（可选）" maxlength="10">
       </div>
       <div class="publish-header">
         <div class="avatar" id="myAvatar">😺</div>
-        <textarea id="postInput" placeholder="分享你家主子的日常… 🐱"></textarea>
+        <textarea id="postInput" placeholder="發布征戰心得、戰報分享… ⚔️"></textarea>
       </div>
       <div class="publish-actions">
-        <div style="font-size:0.75rem;color:var(--brown-light)" id="publishStatus"></div>
-        <button class="publish-btn" onclick="publishPost()">🐱 发 布</button>
+        <div id="publishStatus" class="status"></div>
+        <button class="publish-btn" onclick="publishPost()">⚔️ 發 布</button>
       </div>
     </div>
     <div class="topic-tags">
-      <span class="topic-tag active" data-topic="all" onclick="switchTopic(this)">🌐 全部</span>
-      <span class="topic-tag" data-topic="daily" onclick="switchTopic(this)">☀️ 日常晒猫</span>
-      <span class="topic-tag" data-topic="funny" onclick="switchTopic(this)">😂 搞笑瞬间</span>
-      <span class="topic-tag" data-topic="health" onclick="switchTopic(this)">🏥 养猫科普</span>
-      <span class="topic-tag" data-topic="ask" onclick="switchTopic(this)">❓ 求助问答</span>
+      <span class="topic-tag active" data-topic="all" onclick="switchTopic(this)">🏯 全部</span>
+      <span class="topic-tag" data-topic="daily" onclick="switchTopic(this)">⚔️ 配將討論</span>
+      <span class="topic-tag" data-topic="funny" onclick="switchTopic(this)">🎯 戰報分享</span>
+      <span class="topic-tag" data-topic="health" onclick="switchTopic(this)">📖 攻略心得</span>
+      <span class="topic-tag" data-topic="ask" onclick="switchTopic(this)">❓ 求助問答</span>
     </div>
     <div class="feed" id="feedContainer">
-      <div class="loading-spinner" id="loading"><span class="spin">🐱</span> 加载中…</div>
+      <div class="loading-spinner" id="loading"><span class="spin">⚔️</span> 加载軍情…</div>
     </div>
-    <div style="text-align:center;padding:32px 0 16px;color:var(--brown-light);font-size:0.8rem;border-top:1px solid #f0d5c8;margin-top:24px;">
-      ⚔️ 戰盟圈子 · 兄弟齊心 其利斷金<br>Made with 💗 for all 戰友
+    <div class="footer">
+      🏯 戰盟風雲 · 兄弟齊心 · 其利斷金<br>⚔️ 三戰同好聚集地
     </div>
   </div>
   <script>
@@ -285,7 +435,7 @@
         container.innerHTML = `
           <div class="loading-spinner">
             <div style="font-size:4rem;margin-bottom:12px">🐾</div>
-            <p style="color:var(--brown-light)">还没有帖子，快来发第一条吧！</p>
+            <p style="color:var(--brown-light)">暫無軍報，快來發布第一條！</p>
           </div>`;
         return;
       }
@@ -353,13 +503,13 @@
         });
 
         input.value = '';
-        toast('⚔️ 发布成功！戰友们都看到啦 ✨');
+        toast('⚔️ 軍報已發！全盟皆知 ✨');
         await loadPosts();
       } catch(e) {
         toast('😿 发布失败: ' + e.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = '🐱 发 布';
+        btn.textContent = '⚔️ 發 布';
         document.getElementById('publishStatus').textContent = '';
       }
     }
