@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐱 云喵圈子 — 铲屎官的快乐老家</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -127,10 +127,16 @@
     </div>
   </div>
   <script>
-    // ===== Supabase config =====
+    // ===== Supabase REST API (no CDN needed) =====
     const SUPABASE_URL = 'https://uvonaehwgylezomtdyxi.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2b25hZWh3Z3lsZXpvbXRkeXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1ODAsImV4cCI6MjA5NjYxNTU4MH0.F7hGSNSOCXS8Iw_3E6zZKxNfnPwWp69no6M1xtqFWlo';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2b25hZWh3Z3lsZXpvbXRkeXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1ODAsImV4cCI6MjA5NjYxNTU4MH0.F7hGSNSOCXS8Iw_3E6zZKxNfnPwWp69no6M1xtqFWlo';
+    const apiHeaders = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+    const api = {
+      select: async (table, opts = {}) => { const params = new URLSearchParams(); params.set('select', '*'); if (opts.order) params.set('order', opts.order); if (opts.limit) params.set('limit', opts.limit); const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + params, { headers: apiHeaders }); if (!r.ok) throw new Error(await r.text()); return r.json(); },
+      insert: async (table, data) => { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table, { method: 'POST', headers: apiHeaders, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); },
+      update: async (table, id, data) => { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?id=eq.' + id, { method: 'PATCH', headers: apiHeaders, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); },
+      delete: async (table, id) => { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?id=eq.' + id, { method: 'DELETE', headers: apiHeaders }); if (!r.ok) throw new Error(await r.text()); return true; }
+    };
 
     // ===== State =====
     let currentTopic = 'all';
@@ -167,20 +173,15 @@
       el._hide = setTimeout(() => el.classList.remove('show'), 2000);
     }
 
-    // ===== Load Posts from Supabase =====
+    // ===== Load Posts =====
     async function loadPosts() {
       try {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-        if (error) throw error;
+        const data = await api.select('posts', { order: 'created_at.desc', limit: 50 });
         posts = data || [];
         renderPosts();
       } catch(e) {
         console.error('Load error:', e);
-        document.getElementById('loading').innerHTML = '😿 加载失败，请刷新重试';
+        document.getElementById('loading').innerHTML = '😿 加载失败: ' + e.message;
       }
     }
 
@@ -254,7 +255,7 @@
       const myColor = colors[Math.floor(Math.random() * colors.length)];
 
       try {
-        const { error } = await supabase.from('posts').insert({
+        await api.insert('posts', {
           content: text,
           author_name: myName,
           avatar: myAv,
@@ -262,7 +263,6 @@
           topic: currentTopic === 'all' ? 'daily' : currentTopic,
           likes: 0
         });
-        if (error) throw error;
 
         input.value = '';
         toast('🐱 发布成功！喵友们都看到啦 ✨');
@@ -280,8 +280,7 @@
     async function deletePost(postId) {
       if (!confirm('确定要删除这条帖子吗？😿')) return;
       try {
-        const { error } = await supabase.from('posts').delete().eq('id', postId);
-        if (error) throw error;
+        await api.delete('posts', postId);
         toast('🗑️ 已删除');
         await loadPosts();
       } catch(e) {
@@ -299,7 +298,7 @@
       post.likes = newLikes;
 
       try {
-        await supabase.from('posts').update({ likes: newLikes }).eq('id', postId);
+        await api.update('posts', postId, { likes: newLikes });
         renderPosts();
       } catch(e) {
         post.likes = (post.likes || 0) + (post.liked ? -1 : 1);
@@ -317,13 +316,14 @@
       renderPosts();
     }
 
-    // ===== Realtime subscription =====
+    // ===== Simple polling for realtime (no WebSocket needed) =====
     function setupRealtime() {
-      supabase.channel('public:posts')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
-          loadPosts();
-        })
-        .subscribe();
+      setInterval(loadPosts, 10000);
+    }
+
+    // ===== Stats update =====
+    function updateStats() {
+      document.getElementById('postCount').textContent = posts.length;
     }
 
     // ===== Init =====
@@ -374,6 +374,9 @@
       loadPosts();
       setupRealtime();
       if (isAdmin) renderAdminBadge();
+      // Auto-refresh stats
+      setInterval(updateStats, 15000);
+      updateStats();
     });
 
     // Ctrl+Enter shortcut
