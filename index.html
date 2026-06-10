@@ -384,10 +384,23 @@
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) publishPost();
     });
 
-    // Update nickname display
+    // Save nickname immediately on blur
+    document.getElementById('nicknameInput').addEventListener('blur', function() {
+      if (this.value.trim()) {
+        localStorage.setItem('yunmiao_nickname', this.value.trim());
+        toast('✅ 昵称已改为: ' + this.value.trim());
+      }
+    });
+    // Allow pressing Enter to save nickname
+    document.getElementById('nicknameInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        this.blur();
+      }
+    });
+    // Update placeholder as user types
     document.getElementById('nicknameInput').addEventListener('input', function() {
       if (this.value.trim()) {
-        this.placeholder = '你的喵名';
+        this.placeholder = '输入完点其他地方或按回车保存';
       } else {
         this.placeholder = '你的喵名（当前: ' + getMyName() + '）';
       }
