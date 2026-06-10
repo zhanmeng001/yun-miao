@@ -80,9 +80,55 @@
     .delete-btn { background:none; border:none; cursor:pointer; font-size:0.8rem; color:#ccc; padding:2px 6px; border-radius:6px; transition:all 0.15s; margin-left:6px; flex-shrink:0; }
     .delete-btn:hover { color:#e8829a; background:#fef0f0; }
     .post-header-right { display:flex; align-items:center; margin-left:auto; }
+
+    /* ===== Access Gate ===== */
+    #accessGate {
+      position:fixed; inset:0; z-index:1000;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+    }
+    #accessGate.hidden { display:none; }
+    .gate-box {
+      background:rgba(255,255,255,0.08); backdrop-filter:blur(16px);
+      border-radius:24px; padding:40px 32px; max-width:380px; width:90%;
+      text-align:center; border:1px solid rgba(255,255,255,0.12);
+    }
+    .gate-box h1 { color:#fff; font-size:1.6rem; letter-spacing:4px; }
+    .gate-box .sub { color:rgba(255,255,255,0.6); font-size:0.85rem; margin:8px 0 24px; }
+    .gate-box input {
+      width:100%; padding:12px 16px; border-radius:14px; border:1.5px solid rgba(255,255,255,0.15);
+      background:rgba(255,255,255,0.06); color:#fff; font-size:0.95rem; outline:none;
+      transition:border-color 0.2s; font-family:inherit;
+      box-sizing:border-box; margin-bottom:12px;
+    }
+    .gate-box input:focus { border-color:#e8829a; }
+    .gate-box input::placeholder { color:rgba(255,255,255,0.3); }
+    .gate-box .gate-btn {
+      width:100%; padding:12px; border-radius:14px; border:none;
+      background:linear-gradient(135deg,#e8829a,#f7a1b5);
+      color:#fff; font-size:1rem; cursor:pointer; font-weight:700;
+      transition:transform 0.15s,box-shadow 0.15s;
+    }
+    .gate-box .gate-btn:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(232,130,154,0.4); }
+    .gate-box .gate-btn:active { transform:scale(0.98); }
+    .gate-box .error { color:#ff6b6b; font-size:0.8rem; margin-top:8px; min-height:20px; }
+    .gate-box .logo-emoji { font-size:3rem; margin-bottom:8px; }
   </style>
 </head>
 <body>
+  <!-- ===== Access Gate (shown first) ===== -->
+  <div id="accessGate">
+    <div class="gate-box">
+      <div class="logo-emoji">⚔️</div>
+      <h1>戰盟圈子</h1>
+      <p class="sub">微信群專屬 · 輸入邀請碼進入</p>
+      <input id="gateInviteCode" type="text" placeholder="邀請碼" maxlength="20" autocomplete="off">
+      <input id="gateNickname" type="text" placeholder="你的微信群暱稱（选填）" maxlength="15" autocomplete="off">
+      <button class="gate-btn" onclick="enterGate()">⚔️ 進 入</button>
+      <div class="error" id="gateError"></div>
+    </div>
+  </div>
+
   <div class="floating-cats">
     <span>🐱</span><span>😸</span><span>😺</span><span>🐈</span><span>😻</span><span>🐾</span>
   </div>
@@ -143,6 +189,39 @@
     let posts = [];
     let isAdmin = localStorage.getItem('yunmiao_admin') === 'true';
     let adminClickCount = 0;
+    // ===== Access Control =====
+    const INVITE_CODE = (localStorage.getItem('zhanmeng_invite_code') || 'ZM2026').toLowerCase();
+
+    function enterGate() {
+      const codeInput = document.getElementById('gateInviteCode').value.trim().toLowerCase();
+      const nickInput = document.getElementById('gateNickname').value.trim();
+      const errEl = document.getElementById('gateError');
+
+      if (!codeInput) { errEl.textContent = '請輸入邀請碼'; return; }
+      if (codeInput !== INVITE_CODE) {
+        errEl.textContent = '❌ 邀請碼錯誤，請在微信群中獲取';
+        return;
+      }
+
+      // Save nickname if provided
+      if (nickInput) {
+        localStorage.setItem('yunmiao_nickname', nickInput);
+      }
+      localStorage.setItem('zhanmeng_verified', 'true');
+      document.getElementById('accessGate').classList.add('hidden');
+      toast('⚔️ 歡迎來到戰盟圈子！');
+      initApp();
+    }
+
+    // Check if already verified
+    function checkAccess() {
+      if (localStorage.getItem('zhanmeng_verified') === 'true') {
+        document.getElementById('accessGate').classList.add('hidden');
+        return true;
+      }
+      return false;
+    }
+
     const randomAvatars = ['😺','😸','😻','😼','😽','🙀','😿','😹','🐱','🐈','🐾','🐟'];
     const randomNames = ['橘子味の猫','胖橘饲养员','布偶控小七','猫饼投喂机','铲屎大将军','罐头开罐器','猫毛收集者','深夜吸猫人','猫薄荷成瘾','喵星特派员','云养猫冠军','逗猫棒终结者','猫罐头鉴定师','小鱼干守护者','猫窝质检员','撸猫专业户'];
     const colors = ['#a8e6cf','#f7c6d6','#b8d4f0','#ffe0b2','#c8e6c9','#f0d5c8','#e1bee7','#b2dfdb','#ffccbc','#d1c4e9'];
@@ -342,6 +421,16 @@
         const pwd = prompt('🔑 输入管理员密码：');
         if (pwd === 'YunMiao2026') {
           toggleAdmin();
+          // After admin login, offer to show/change invite code
+          setTimeout(() => {
+            if (confirm('🔑 当前邀請碼: ' + INVITE_CODE.toUpperCase() + '\n要修改邀請碼嗎？')) {
+              const newCode = prompt('輸入新邀請碼（留空不變）:', INVITE_CODE.toUpperCase());
+              if (newCode && newCode.trim()) {
+                localStorage.setItem('zhanmeng_invite_code', newCode.trim().toLowerCase());
+                toast('✅ 邀請碼已更新為: ' + newCode.trim().toUpperCase());
+              }
+            }
+          }, 500);
         } else if (pwd !== null) {
           toast('❌ 密码错误');
         }
@@ -365,11 +454,12 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // ===== App Init (called after access granted) =====
+    function initApp() {
       // Set my avatar
       document.getElementById('myAvatar').textContent = getMyAvatar();
       // Set nickname input placeholder
-      document.getElementById('nicknameInput').placeholder = '你的喵名（当前: ' + getMyName() + '）';
+      document.getElementById('nicknameInput').placeholder = '你的名字（當前: ' + getMyName() + '）';
       // Load posts
       loadPosts();
       setupRealtime();
@@ -377,6 +467,16 @@
       // Auto-refresh stats
       setInterval(updateStats, 15000);
       updateStats();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAccess()) {
+        // Show gate - already visible by default
+        const nick = localStorage.getItem('yunmiao_nickname');
+        if (nick) {
+          document.getElementById('gateNickname').placeholder = '微信群暱稱（當前: ' + nick + '）';
+        }
+      }
     });
 
     // Ctrl+Enter shortcut
