@@ -215,6 +215,15 @@
 
     // Check if already verified
     function checkAccess() {
+      // Auto-fill nickname from URL ?name=xxx
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameFromUrl = urlParams.get('name');
+      if (nameFromUrl) {
+        document.getElementById('gateNickname').value = nameFromUrl;
+        // Also save it right away so they don't need to re-type
+        localStorage.setItem('yunmiao_nickname', decodeURIComponent(nameFromUrl));
+      }
+
       if (localStorage.getItem('zhanmeng_verified') === 'true') {
         document.getElementById('accessGate').classList.add('hidden');
         return true;
